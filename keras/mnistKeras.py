@@ -1,27 +1,81 @@
+import numpy as np
+import keras
 from keras.models import  Sequential
-from keras.layers import  Dense
-import numpy
-# fix random seed for reproducibility
-numpy.random.seed(7)
-# load pima indians dataset
-dataset = numpy.loadtxt("pima-indians-diabetes.csv", delimiter=",")
-# split into input (X) and output (Y) variables
-X = dataset[:,0:8]
-Y = dataset[:,8]
-# create model
+from keras.layers import  Dense, Dropout, Activation, Flatten
+from keras.layers.convolutional import  Conv2D, MaxPooling2D
+from keras.utils import  np_utils
+from keras.datasets import  mnist
+from keras import  backend as K
+from matplotlib import pyplot as plt
+
+# seed init
+np.random.seed(123)  # for reproducibility
+
+
+batch_size = 128
+num_classes = 10
+epochs = 12
+# input image dimensions
+img_rows, img_cols = 28, 28
+# Load pre-shuffled MNIST data into train and test sets
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+print(keras.__version__)
+print( x_train.shape)
+# (60000, 28, 28)
+
+
+if K.image_data_format() == 'channels_first':
+    x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
+    x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
+    input_shape = (1, img_rows, img_cols)
+else:
+    x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
+    x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
+    input_shape = (img_rows, img_cols, 1)
+
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
+print('x_train shape:', x_train.shape)
+print(x_train.shape[0], 'train samples')
+print(x_test.shape[0], 'test samples')
+
+#convert class vectors to binary class matrices
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
+print(input_shape)
+
+# Model Definition
+# Annd 2 conv2d layers, a max pool and a a Dropout. Dropout layers randomly
+# dropping outputs of a layer, they help combat overfitting.
 model = Sequential()
-model.add(Dense(12, input_dim=8, activation='relu'))
-model.add(Dense(8, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-# Compile model
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-# Fit the model
-model.fit(X, Y, epochs=150, batch_size=10)
-# evaluate the model
-scores = model.evaluate(X, Y)
-# calculate predictions
-predictions = model.predict(X)
-# round predictions
-rounded = [round(x[0]) for x in predictions]
-print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-print("Rounded:", rounded )
+model.add(Conv2D(32, kernel_size=(3, 3),
+activation='relu',
+input_shape=input_shape))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
+model.compile(loss=keras.losses.categorical_crossentropy,
+optimizer=keras.optimizers.Adam(),
+metrics=['accuracy'])
+model.fit(x_train, y_train,
+batch_size=batch_size,
+epochs=epochs,
+verbose=1,
+validation_data=(x_test, y_test))
+
+# report accuracy
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+
+# save the model 
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+    json_file.write(model_json)
+    model.save_weights("model.h5")
