@@ -23,7 +23,8 @@ print(keras.__version__)
 print( x_train.shape)
 # (60000, 28, 28)
 
-
+# Backend is Tensorflow which accepts input as Batch, Number Channels, height, width
+# So we have to reshape the input to that format.
 if K.image_data_format() == 'channels_first':
     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
     x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
@@ -47,7 +48,7 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 print(input_shape)
 
 # Model Definition
-# Annd 2 conv2d layers, a max pool and a a Dropout. Dropout layers randomly
+# 2 conv2d layers, a max pool and a a Dropout. Dropout layers randomly
 # dropping outputs of a layer, they help combat overfitting.
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
@@ -71,8 +72,8 @@ validation_data=(x_test, y_test))
 
 # report accuracy
 score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+print('Target loss:', score[0])
+print('Taerget accuracy:', score[1])
 
 # save the model 
 model_json = model.to_json()
