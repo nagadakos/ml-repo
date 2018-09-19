@@ -12,9 +12,9 @@ from matplotlib import pyplot as plt
 np.random.seed(123)  # for reproducibility
 
 
-batch_size = 128
+batch_size = 64
 num_classes = 10
-epochs = 12
+epochs = 100
 # input image dimensions
 img_rows, img_cols = 28, 28
 # Load pre-shuffled MNIST data into train and test sets
@@ -64,7 +64,7 @@ model.add(Dense(num_classes, activation='softmax'))
 model.compile(loss=keras.losses.categorical_crossentropy,
 optimizer=keras.optimizers.Adam(),
 metrics=['accuracy'])
-model.fit(x_train, y_train,
+history = model.fit(x_train, y_train,
 batch_size=batch_size,
 epochs=epochs,
 verbose=1,
@@ -80,3 +80,9 @@ model_json = model.to_json()
 with open("model.json", "w") as json_file:
     json_file.write(model_json)
     model.save_weights("model.h5")
+    for keys in history.history.keys():
+        print(keys)
+with open("mnistKeras_report.txt", "a") as f:
+    for i in range(len(history.history['acc'])):
+        print(i)
+        f.write("{0:.4f} {1:.4f} {2:.4f} {3:.4f}\n".format(history.history['acc'][i], history.history['loss'][i], history.history['val_acc'][i], history.history['val_loss'][i]))
