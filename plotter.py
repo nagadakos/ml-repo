@@ -36,19 +36,23 @@ for i,f in enumerate(files):
             reps[i][testAcc].append(report[testAcc])
             reps[i][testLoss].append(report[testLoss])
 
-        # for i,l in enumerate(k):
-            # # Ignore last character from line parser as it is just the '/n' char.
-            # report = l[:-1].split(' ')
-            # kerasRep[trainAcc].append(report[trainAcc])
-            # kerasRep[trainLoss].append(report[trainLoss])
-            # kerasRep[testAcc].append(report[testAcc])
-            # kerasRep[testLoss].append(report[testLoss])
+           # kerasRep[testLoss].append(report[testLoss])
 
         epochs = len(reps[0][0])
-    # Sanity Print
-    # print(kerasRep)
 
+# Sanity Print
+# print(reps)
 
+#************************************
+#Function: Plot Accuracy
+#Description:   This function will plot the accuracy curve of 2 statistics
+ #              Reports, given they are in the format train acc, train loss
+#               test acc, test loss.
+#Arguments:     rep1:   list of stas report 1 
+#               rep2:   list of stas report 2 
+#               epochs: int. Number of epochs
+#               title:  string, used to anotate the plot figure.
+#***********************************
 def plot_acc( rep1, rep2, epochs, title):
    
     a = np.asarray(rep1, dtype = np.float32)
@@ -97,6 +101,7 @@ def plot_acc( rep1, rep2, epochs, title):
 
     # plt.draw()
     # plt.pause(10)
+# TODO: This Function will plot all reports on the same figure!
 def plot_all_in_one(reps, epochs, title):
 
     print("Hellos")
