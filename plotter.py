@@ -97,15 +97,18 @@ def plot_acc( rep1, rep2, epochs, title):
 
     # plt.draw()
     # plt.pause(10)
+def plot_all_in_one(reps, epochs, title):
+
+    print("Hellos")
 
 def main():
     title = 'Keras-PyTorch DROPOUT Model: Accuracy vs Epoch'
-    plot_acc(reps[0],reps[1], epochs, title)
+    plot_acc(reps[1],reps[0], epochs, title)
     plt.savefig("./plots/keras_vs_pytorch_dropout_train-epoch.png")
     plt.close()
 
     title = 'Keras-PyTorch NO-DROP Model: Accuracy vs Epoch'
-    plot_acc(reps[2],reps[3], epochs, title)
+    plot_acc(reps[3],reps[2], epochs, title)
     plt.savefig("./plots/keras_vs_pytorch_NO_dropout_train-epoch.png")
     plt.close()
 if __name__ == '__main__':
