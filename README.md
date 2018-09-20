@@ -43,13 +43,59 @@ is required. You can set this up with:
 
 pip3 isntall tensorflow-gpu==1.4.1
 
+]>  PyTorch
+----------------------------------------------------------------
+
+Envirnment used:
+
+					Backend: 	Torch
+					Interface: 	PyTorch v0.4			
+					Deployment: -
+					Python:     V3.6
+
+
+Replication instructions:
+There are 2 ways to install required software based on your prefared module managers
+A. conda or B. pip. The following assumes you have a working CUDA 8.x installation.
+
+A. Conda
+1. conda install pytorch torchvision cuda80 -c pytorch
+
+B. PIP + CUDA 8.x
+
+# Python 2.7
+pip install http://download.pytorch.org/whl/cu80/torch-0.4.1-cp27-cp27mu-linux_x86_64.whl
+pip install torchvision
+# if the above command does not work, then you have python 2.7 UCS2, use this command
+pip install http://download.pytorch.org/whl/cu80/torch-0.4.1-cp27-cp27m-linux_x86_64.whl
+# Python 3.5
+pip3 install http://download.pytorch.org/whl/cu80/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
+pip3 install torchvision
+# Python 3.6
+pip3 install http://download.pytorch.org/whl/cu80/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+pip3 install torchvision
+# Python 3.7
+pip3 install http://download.pytorch.org/whl/cu80/torch-0.4.1.post2-cp37-cp37m-linux_x86_64.whl
+pip3 install torchvision
 
 
 
+# ##########################################################
+#
+#		Architecture Overview
+#
+# ##########################################################
 
+Section 1 - Introduction.
+-------------------------------
 
-
-
+The files found in this repository are Deep Netowrk architectures designed
+to perform character recognition on the famous MNIST handwritten characters data
+set. Each folder from the Keras, PyTorch, Gluon list contains architectures 
+described in that framework. The results are graphically presented in the plots
+folder, models are saved in the models folder. At ther root level, top level 
+modules are stored such as the plotter.py, a module used to draw various curves
+to visualize data, accuracy, losss etc.
 
 
 
