@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import PIL
 import numpy as np
 import sys as sys
+import time
 
 # Index definitions to be used with history log.
 trainAcc = 0
@@ -20,7 +21,7 @@ testLoss = 3
 
 # Parameters
 batch   = 64
-epochs  = 100
+epochs  = 3
 gamma   = 0.01
 momnt   = 0.5
 device  = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -202,23 +203,27 @@ class Net(nn.Module):
 #-----------------------------
 def main():
     print("######### Initiating MNIST network training #########\n")
-
-    model = Net().to(device)
-    optim = optm.SGD(model.parameters(), lr=gamma, momentum=momnt)
-
+    model  = Net().to(device)
+    optim  = optm.SGD(model.parameters(), lr=gamma, momentum=momnt)
+    tTotal = 0
+    tAvg   = 0
     for e in range(epochs):
         print("Epoch: {} start ------------\n".format(e))
         # print("Dev {}".format(device))
         args = e
+        t0 = time.time()
         model.train(args, device, trainLoader, optim)
+        t1 = time.time()
         model.test(device, testLoader)
+        tTotal += t1 - t0
     # Final report
     model.report()
-
-    with open('kerasMirror_pytorch_rep.txt', 'a') as f:
-        for i in range(len(model.history[0])):
-            f.write("{:.4f} {:.4f} {:4f} {:.4f}\n".format(model.history[0][i], model.history[1][i],
-                                                 model.history[2][i], model.history[3][i]))
+    tAvg = tTotal/epochs 
+    print("Average train Time: {:.4f}s. Toal: {:.4f}s".format(tAvg, tTotal) )
+    # with open('kerasMirror_pytorch_rep.txt', 'a') as f:
+        # for i in range(len(model.history[0])):
+            # f.write("{:.4f} {:.4f} {:4f} {:.4f}\n".format(model.history[0][i], model.history[1][i],
+                                                 # model.history[2][i], model.history[3][i]))
 # Define behavior if this module is the main executable.
 if __name__ == '__main__':
     main()
