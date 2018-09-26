@@ -71,9 +71,11 @@ verbose=1,
 validation_data=(x_test, y_test))
 
 # report accuracy
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Target loss:', score[0])
-print('Taerget accuracy:', score[1])
+eval_iters = 1000
+for t in range(eval_iters)
+evalHistory = model.evaluate(x_test, y_test, verbose=0 )
+print('Target loss:', evalHistory[0])
+print('Taerget accuracy:', evalHistory[1])
 
 # save the model 
 model_json = model.to_json()
@@ -82,7 +84,7 @@ with open("model.json", "w") as json_file:
     model.save_weights("model.h5")
     for keys in history.history.keys():
         print(keys)
-with open("mnistKeras_report.txt", "a") as f:
+with open("mnistKeras_train_report.txt", "w") as f:
     for i in range(len(history.history['acc'])):
         print(i)
         f.write("{0:.4f} {1:.4f} {2:.4f} {3:.4f}\n".format(history.history['acc'][i], history.history['loss'][i], history.history['val_acc'][i], history.history['val_loss'][i]))
