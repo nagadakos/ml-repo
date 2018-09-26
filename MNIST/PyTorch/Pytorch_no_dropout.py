@@ -20,7 +20,7 @@ testLoss = 3
 
 # Parameters
 batch   = 64
-epochs  = 100
+epochs  = 12
 gamma   = 0.01
 momnt   = 0.5
 device  = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -195,7 +195,9 @@ def main():
 
     model = Net().to(device)
     optim = optm.SGD(model.parameters(), lr=gamma, momentum=momnt)
-
+    optim  = optm.Adam(model.parameters())
+    tTotal = 0
+    testIters = 1000
     for e in range(epochs):
         print("Epoch: {} start ------------\n".format(e))
         # print("Dev {}".format(device))
@@ -205,10 +207,15 @@ def main():
     # Final report
     model.report()
 
-    with open('PyTorch_no_drop_report.txt', 'a') as f:
+    with open('PyTorch_no_drop_rep.txt', 'w') as f:
         for i in range(len(model.history[0])):
             f.write("{:.4f} {:.4f} {:4f} {:.4f}\n".format(model.history[0][i], model.history[1][i],
                                                  model.history[2][i], model.history[3][i]))
+    for t in range(testIters):
+            model.test(device, testLoader)
+    with open('PyTorch_no_drop_eval.txt', 'w') as f:
+        for i in range(len(model.history[testAcc])):
+            f.write("{:.4f} {:.4f} \n".format(model.history[testAcc][i], model.history[testLoss][i]))
 # Define behavior if this module is the main executable.
 if __name__ == '__main__':
     main()

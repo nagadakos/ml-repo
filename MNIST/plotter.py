@@ -5,14 +5,19 @@ import numpy as np
 
 
 file1 = "./PyTorch/kerasMirror_pytorch_rep.txt"
-file2 = './keras/mnistKeras_report.txt'
-file3 = './keras/PyTorch_no_drop_report.txt'
-file4 = './keras/mnistKeras_no_drop_report.txt'
+file2 = './Keras/mnistKeras_report.txt'
+file3 = './PyTorch/PyTorch_no_drop_report.txt'
+file4 = './Keras/mnistKeras_no_drop_report.txt'
+file5 = './PyTorch/PyTorch_drop_eval.txt'
+file6 = './PyTorch/PyTorch_no_drop_eval.txt'
 
-# This list has the filenames to examine
+# This list has the filelabels to examine
 files = [file1, file2, file3, file4]
+eval_files = [file5, file6]
+labels = ["PyTorch-Drop", "Keras-Drop", "PyTorch-NO_Drop", "Keras-NO_Drop"]
 # Lists acting as data holders.
 reps  = []
+eval_reps  = []
 # index variables
 trainAcc  = 0
 trainLoss = 1
@@ -24,10 +29,7 @@ epochs = 0
 # open files and read data
 for i,f in enumerate(files):
     reps.append([[],[],[],[]])
-    print(i)
-    print("Size of reps list: {} {}".format(len(reps),len(reps[0])))
     with open(f, 'r') as p:
-        print("i is {}".format(i))
         for j,l in enumerate(p):
             # Ignore last character from line parser as it is just the '/n' char.
             report = l[:-1].split(' ')
@@ -39,7 +41,20 @@ for i,f in enumerate(files):
            # kerasRep[testLoss].append(report[testLoss])
 
         epochs = len(reps[0][0])
+        reps[i] = np.asarray(reps[i], dtype = np.float32)
 
+for i,f in enumerate(eval_files):
+    eval_reps.append([[],[]])
+    with open(f, 'r') as p:
+        for j,l in enumerate(p):
+            # Ignore last character from line parser as it is just the '/n' char.
+            report = l[:-1].split(' ')
+            eval_reps[i][trainAcc].append(report[trainAcc])
+            eval_reps[i][trainLoss].append(report[trainLoss])
+
+
+        evalEpochs = len(eval_reps[0][0])
+        eval_reps[i] = np.asarray(eval_reps[i], dtype = np.float32)
 # Sanity Print
 # print(reps)
 
@@ -58,7 +73,6 @@ def plot_acc( rep1, rep2, epochs, title):
     a = np.asarray(rep1, dtype = np.float32)
     b = np.asarray(rep2, dtype = np.float32)
     ymin =np.asscalar(np.fmin(a[0][0], b[0][0]))
-    print(ymin)
     epchs = np.arange(1, epochs+1)
     fig = plt.figure()
     plt.title(title)
@@ -106,7 +120,42 @@ def plot_all_in_one(reps, epochs, title):
 
     print("Hellos")
 
+#############################################################
+#
+# Description:  This function computer the moments from training
+#               reports. They are 4 Columns: train acc, train loss
+#               test acc, test loss.
+#############################################################
+def comp_train_moments(reps, epochs, labels):
+    print("Size of report: {} {} {}".format(len(reps), len(reps[0]), len(reps[0][1])))
+    moments = [[], []]
+    moments[0] = np.mean(reps, axis = 2)
+    moments[1] = np.std(reps, axis = 2)
+    for i, l in enumerate(labels):
+        print("{:<20}: {}" .format(labels[i], moments[0][i]))
+    return moments
+
+#############################################################
+#
+# Description:  This function computes the moments of evaluation
+#               reports in the format accuracy, loss
+#############################################################
+def comp_eval_moments(reps, epochs, labels):
+    print("Size of report: {} {} {}".format(len(reps), len(reps[0]), len(reps[0][1])))
+    moments = [[], []]
+    print("{} {} {}".format(len(reps), len(reps[0]), len(reps[0][0])) )
+    print("{} {} {}".format(len(reps), len(reps[1]), len(reps[1][0])) )
+    moments[0] = np.mean(reps, axis = 2)
+    moments[1] = np.std(reps, axis = 2)
+    for i, l in enumerate(labels):
+        print("{:<20} MEAN: {}" .format(labels[i], moments[0][i]))
+        print("{:<20} STD : {}" .format(labels[i], moments[1][i]))
+    return moments
 def main():
+
+    # Compute moments of reported data
+    moments  = comp_train_moments(reps, epochs, labels)
+    moments2 = comp_eval_moments(eval_reps, evalEpochs, ["PyTorch Drop Eval", "PyTorch NO-Drop Eval"])
     title = 'Keras-PyTorch DROPOUT Model: Accuracy vs Epoch'
     plot_acc(reps[1],reps[0], epochs, title)
     plt.savefig("./plots/keras_vs_pytorch_dropout_train-epoch.png")
