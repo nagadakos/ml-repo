@@ -57,23 +57,27 @@ class mnist_Net(gluon.Block):
         with self.name_scope():
             # layers created in name_scope will inherit name space
             # from parent layer.
-            self.conv1 = nn.Conv2D(6, kernel_size=5)
+            self.conv1 = nn.Conv2D(32, kernel_size=3)
             self.pool1 = nn.MaxPool2D(pool_size=(2,2))
-            self.conv2 = nn.Conv2D(16, kernel_size=5)
+            self.conv2 = nn.Conv2D(64, kernel_size=3)
             self.pool2 = nn.MaxPool2D(pool_size=(2,2))
-            self.fc1 = nn.Dense(120)
-            self.fc2 = nn.Dense(84)
-            self.fc3 = nn.Dense(10)
+            self.drop2D= nn.Dropout(0.25)
+            self.drop1D= nn.Dropout(0.5)
+            self.fc1 = nn.Dense(128)
+            self.fc2 = nn.Dense(10)
+            # self.fc3 = nn.Dense(10)
 
     def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
+        x = F.relu(self.conv1(x))
         x = self.pool2(F.relu(self.conv2(x)))
+        x = self.drop2D(x)
         # 0 means copy over size from corresponding dimension.
         # -1 means infer size from the rest of dimensions.
         x = x.reshape((0, -1))
         x = F.relu(self.fc1(x))
+        x = self.drop1D(x)
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.softmax(x)
         return x
 
     def train(self, args, trainData):
@@ -81,31 +85,57 @@ class mnist_Net(gluon.Block):
         lossFunction = args[1]
         trainer     = args[2]
         device      = args[3]
-        for e in range(epoch):
-            acc    = 0.0
-            tLoss   = 0.0
-            for batch_idx, (data, label) in enumerate(trainDataLoader):
-                # if batch_idx % 100 == 0:
-                    # print("Batch: {}/{} size: {}".format(batch_idx, len(trainDataLoader), data.shape))
-                data  = data.as_in_context(device)
-                label = label.as_in_context(device)
 
-                with autograd.record():
-                    output = self(data)
-                    loss = lossFunction(output, label)
-                    loss.backward()
-                trainer.step(batch_size) 
+        acc    = 0.0
+        tLoss   = 0.0
+        for batch_idx, (data, label) in enumerate(trainDataLoader):
+            # if batch_idx % 100 == 0:
+                # print("Batch: {}/{} size: {}".format(batch_idx, len(trainDataLoader), data.shape))
+            data  = data.as_in_context(device)
+            label = label.as_in_context(device)
 
-                # Get loss and accuracy
-                predictions = nd.argmax(output, axis=1)
-                acc += (predictions == label.astype('float32') ).mean().asscalar() 
-                tLoss += loss.mean().asscalar() 
-            self.history[trainAcc].append(acc)
-            self.history[trainLoss].append(tLoss)
-            print("Epoch: {} -> Train accuracy: {:.4f} Train Loss: {:.4f}" .format(e, acc /
+            with autograd.record():
+                output = self(data)
+                loss = lossFunction(output, label)
+                loss.backward()
+            trainer.step(batch_size) 
+
+            # Get loss and accuracy
+            predictions = nd.argmax(output, axis=1)
+            acc += (predictions == label.astype('float32') ).mean().asscalar() 
+            tLoss += loss.mean().asscalar() 
+        self.history[trainAcc].append(acc)
+        self.history[trainLoss].append(tLoss)
+        print("Epoch: {} -> Train accuracy: {:.4f} Train Loss: {:.4f}" .format(epoch, acc /
                                                                                len(trainDataLoader),
                                                                               tLoss
                                                                                /len(trainDataLoader)
+                                                                              ))
+    def test(self, args, testData):
+        epoch       = args[0]
+        lossFunction = args[1]
+        device      = args[3]
+        acc    = 0.0
+        tLoss   = 0.0
+        for batch_idx, (data, label) in enumerate(testData):
+            # if batch_idx % 100 == 0:
+                # print("Batch: {}/{} size: {}".format(batch_idx, len(trainDataLoader), data.shape))
+            data  = data.as_in_context(device)
+            label = label.as_in_context(device)
+
+            output = self(data)
+            loss = lossFunction(output, label)
+
+            # Get loss and accuracy
+            predictions = nd.argmax(output, axis=1)
+            acc += (predictions == label.astype('float32') ).mean().asscalar() 
+            tLoss += loss.mean().asscalar() 
+            self.history[testAcc].append(acc)
+            self.history[testLoss].append(tLoss)
+        print("Epoch: {} -> Test accuracy: {:.4f} Test Loss: {:.4f}" .format(epoch, acc /
+                                                                               len(testData),
+                                                                              tLoss
+                                                                               /len(testData)
                                                                               ))
 
 def main():
@@ -127,8 +157,13 @@ def main():
     args.append(lossFunction)
     args.append(trainer)
     args.append(device)
-    net.train(args, trainDataLoader)
+    for e in range(epochs):
+        args[0] = e
+        net.train(args, trainDataLoader)
+        net.test(args, validDataLoader)
 
+    # save the model
+    net.save_parameters('./Models/Gluon_mnist_drop_model.params')
 
 
 
