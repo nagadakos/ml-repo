@@ -105,6 +105,8 @@ class mnist_Net(gluon.Block):
             # Get th e
             predictions = nd.argmax(output, axis=1)
             acc += (predictions == label.astype('float32') ).mean().asscalar() 
+            # Have to devide by the number or categories to convert to
+            # Traditional categorical loss.
             tLoss += loss.mean().asscalar() / 10 
         self.history[trainAcc].append(acc)
         self.history[trainLoss].append(tLoss)
