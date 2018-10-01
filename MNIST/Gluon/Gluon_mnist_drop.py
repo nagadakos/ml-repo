@@ -73,6 +73,7 @@ class mnist_Net(gluon.Block):
         x = self.drop2D(x)
         # 0 means copy over size from corresponding dimension.
         # -1 means infer size from the rest of dimensions.
+        # Essentially flattens to 1D.
         x = x.reshape((0, -1))
         x = F.relu(self.fc1(x))
         x = self.drop1D(x)
@@ -101,9 +102,10 @@ class mnist_Net(gluon.Block):
             trainer.step(batch_size) 
 
             # Get loss and accuracy
+            # Get th e
             predictions = nd.argmax(output, axis=1)
             acc += (predictions == label.astype('float32') ).mean().asscalar() 
-            tLoss += loss.mean().asscalar() 
+            tLoss += loss.mean().asscalar() / 10 
         self.history[trainAcc].append(acc)
         self.history[trainLoss].append(tLoss)
         print("Epoch: {} -> Train accuracy: {:.4f} Train Loss: {:.4f}" .format(epoch, acc /
@@ -124,12 +126,12 @@ class mnist_Net(gluon.Block):
             label = label.as_in_context(device)
 
             output = self(data)
+            predictions = nd.argmax(output, axis=1)
             loss = lossFunction(output, label)
 
             # Get loss and accuracy
-            predictions = nd.argmax(output, axis=1)
             acc += (predictions == label.astype('float32') ).mean().asscalar() 
-            tLoss += loss.mean().asscalar() 
+            tLoss += loss.mean().asscalar() / 10
             self.history[testAcc].append(acc)
             self.history[testLoss].append(tLoss)
         print("Epoch: {} -> Test accuracy: {:.4f} Test Loss: {:.4f}" .format(epoch, acc /
