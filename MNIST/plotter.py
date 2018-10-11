@@ -4,7 +4,7 @@ import numpy as np
 
 
 
-file1 = "./PyTorch/kerasMirror_pytorch_rep.txt"
+file1 = "./PyTorch/PyTorch_drop_rep.txt"
 file2 = './Keras/mnistKeras_report.txt'
 file3 = './PyTorch/PyTorch_no_drop_report.txt'
 file4 = './Keras/mnistKeras_no_drop_report.txt'

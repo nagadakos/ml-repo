@@ -20,7 +20,7 @@ testLoss = 3
 
 # Parameters
 batch   = 64
-epochs  = 12
+epochs  = 100
 gamma   = 0.01
 momnt   = 0.5
 device  = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -197,7 +197,7 @@ def main():
     optim = optm.SGD(model.parameters(), lr=gamma, momentum=momnt)
     optim  = optm.Adam(model.parameters())
     tTotal = 0
-    testIters = 1000
+    testIters = 1
     for e in range(epochs):
         print("Epoch: {} start ------------\n".format(e))
         # print("Dev {}".format(device))
@@ -205,7 +205,7 @@ def main():
         model.train(args, device, trainLoader, optim)
         model.test(device, testLoader)
     # Final report
-    model.report()
+    # model.report()
 
     with open('PyTorch_no_drop_rep.txt', 'w') as f:
         for i in range(len(model.history[0])):
